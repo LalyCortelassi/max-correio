@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <title>Max Correio 💌</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body class="dark-theme">
+  <canvas id="stars-canvas"></canvas>
+
+  <div class="container">
+    <h1 class="logo">💌 Max Correio</h1>
+    <p class="subtitle">Entre com seu e-mail corporativo e libere a zoeira 😈</p>
+
+    <form class="form-box" onsubmit="return validarLogin(event)">
+      <input type="email" id="email" placeholder="seuemail@maxiconsystems.com.br" required />
+      <input type="password" id="senha" placeholder="Sua senha" required />
+      <div id="erroLogin" class="mensagem-feedback erro"></div>
+      <div id="mensagemSucesso" class="mensagem-feedback sucesso"></div>
+      <button type="submit">Entrar</button>
+    </form>
+
+    <div class="form-footer">
+      <p>É novo por aqui? <a href="cadastro.html">Crie sua conta</a></p>
+    </div>
+  </div>
+
+  <!-- Firebase + lógica de login -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyAcLorv7-2vUggVCLV9bkLimDiGc1J3lZw",
+      authDomain: "maxy-correio.firebaseapp.com",
+      projectId: "maxy-correio",
+      storageBucket: "maxy-correio.appspot.com",
+      messagingSenderId: "226088014404",
+      appId: "1:226088014404:web:c0622f86f3a0b2e26d6211"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+
+    window.validarLogin = async function (event) {
+      event.preventDefault();
+
+      const email = document.getElementById("email").value.trim();
+      const senha = document.getElementById("senha").value;
+      const erro = document.getElementById("erroLogin");
+      const sucesso = document.getElementById("mensagemSucesso");
+
+      erro.textContent = "";
+      sucesso.textContent = "";
+
+      if (!email.endsWith("@maxiconsystems.com.br")) {
+        erro.textContent = "⚠️ O e-mail deve terminar com @maxiconsystems.com.br";
+        return;
+      }
+
+      try {
+        const userCredential = await signInWithEmailAndPassword(auth, email, senha);
+
+        if (!userCredential.user.emailVerified) {
+          erro.textContent = "⚠️ E-mail não verificado. Verifique sua caixa de entrada.";
+          return;
+        }
+
+        sucesso.textContent = "✅ Login realizado com sucesso!";
+        // redirecionar ou carregar conteúdo aqui se quiser
+      } catch (error) {
+        if (error.code === "auth/user-not-found") {
+          erro.textContent = "⚠️ Usuário não encontrado.";
+        } else if (error.code === "auth/wrong-password") {
+          erro.textContent = "⚠️ Senha incorreta.";
+        } else {
+          erro.textContent = "❌ Erro ao entrar: " + error.message;
+        }
+      }
+    };
+  </script>
+
+  <!-- Efeito visual -->
+  <script src="js/background.js"></script>
+</body>
+</html>

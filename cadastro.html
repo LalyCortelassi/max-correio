@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <title>Cadastro - Max Correio 💌</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body class="dark-theme">
+  <canvas id="stars-canvas"></canvas>
+
+  <div class="container">
+    <h1 class="logo">💌 Max Correio</h1>
+    <p class="subtitle">Cadastre-se com seu e-mail corporativo</p>
+
+    <form class="form-box" onsubmit="return validarCadastro(event)">
+      <input type="email" id="email" placeholder="seuemail@maxiconsystems.com.br" required />
+
+      <input type="password" id="senha" placeholder="Crie uma senha" required />
+      <input type="password" id="confirmarSenha" placeholder="Confirme a senha" required />
+
+      <div id="erroCadastro" class="mensagem-feedback erro"></div>
+      <div id="mensagemSucesso" class="mensagem-feedback sucesso"></div>
+
+      <button type="submit">Cadastrar</button>
+    </form>
+
+    <div class="form-footer">
+      <p>Já tem conta? <a href="index.html">Voltar ao login</a></p>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getAuth, createUserWithEmailAndPassword, sendEmailVerification } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyAcLorv7-2vUggVCLV9bkLimDiGc1J3lZw",
+      authDomain: "maxy-correio.firebaseapp.com",
+      projectId: "maxy-correio",
+      storageBucket: "maxy-correio.appspot.com",
+      messagingSenderId: "226088014404",
+      appId: "1:226088014404:web:c0622f86f3a0b2e26d6211"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+
+    window.validarCadastro = async function (event) {
+      event.preventDefault();
+
+      const email = document.getElementById("email").value.trim();
+      const senha = document.getElementById("senha").value;
+      const confirmarSenha = document.getElementById("confirmarSenha").value;
+      const erro = document.getElementById("erroCadastro");
+      const sucesso = document.getElementById("mensagemSucesso");
+
+      erro.textContent = "";
+      sucesso.textContent = "";
+
+      if (!email || !senha || !confirmarSenha) {
+        erro.textContent = "⚠️ Preencha todos os campos.";
+        return;
+      }
+
+      if (!email.endsWith("@maxiconsystems.com.br")) {
+        erro.textContent = "⚠️ O e-mail deve terminar com @maxiconsystems.com.br";
+        return;
+      }
+
+      if (senha !== confirmarSenha) {
+        erro.textContent = "⚠️ As senhas não coincidem.";
+        return;
+      }
+
+      try {
+        const userCredential = await createUserWithEmailAndPassword(auth, email, senha);
+        await sendEmailVerification(userCredential.user);
+        sucesso.textContent = "✅ Conta criada! Verifique seu e-mail antes de fazer login.";
+        document.querySelector("form").reset();
+      } catch (error) {
+        if (error.code === "auth/email-already-in-use") {
+          erro.textContent = "⚠️ Este e-mail já está cadastrado.";
+        } else if (error.code === "auth/weak-password") {
+          erro.textContent = "⚠️ A senha precisa ter pelo menos 6 caracteres.";
+        } else {
+          erro.textContent = "❌ Erro ao cadastrar: " + error.message;
+        }
+      }
+    };
+  </script>
+
+  <script src="js/background.js"></script>
+</body>
+</html>

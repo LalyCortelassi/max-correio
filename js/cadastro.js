@@ -43,11 +43,9 @@ window.validarCadastro = async function (event) {
     return;
   }
 
-  const emailCompleto = `${usuario}@maxiconsystems.com.br`;
-
-  try {
+    try {
     const auth = getAuth(app);
-    const userCredential = await createUserWithEmailAndPassword(auth, emailCompleto, senha);
+    const userCredential = await createUserWithEmailAndPassword(auth, usuario, senha);
 
     await sendEmailVerification(userCredential.user);
 
